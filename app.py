@@ -1,5 +1,8 @@
+import os
+import secrets
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, flash
+
+from flask import Flask, render_template, request, redirect, url_for, flash, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,8 +10,9 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignat
 
 # Initialize Flask Application
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mist-salsa-ku-vibrant-key-2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mist_salsa.db'
+# SECRET_KEY must come from the environment in real deployments — never hardcode it in source.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///mist_salsa.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Extensions
@@ -33,6 +37,7 @@ class Member(UserMixin, db.Model):
     role = db.Column(db.String(50), nullable=False, default='Client')  # 'Client', 'Committee', 'Executive'
     position = db.Column(db.String(50), default='Member')              # e.g., 'President', 'Instructor', 'Treasurer'
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
+    must_change_password = db.Column(db.Boolean, nullable=False, default=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -48,7 +53,7 @@ class Fine(db.Model):
     reason = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), default='Unpaid')                 # 'Unpaid' or 'Paid'
     date_issued = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     member = db.relationship('Member', backref=db.backref('fines', lazy=True))
 
 
@@ -58,7 +63,7 @@ class DutyRoster(db.Model):
     duty_name = db.Column(db.String(100), nullable=False)
     duty_date = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(20), default='Scheduled')              # 'Scheduled', 'Completed'
-    
+
     member = db.relationship('Member', backref=db.backref('rosters', lazy=True))
 
 
@@ -73,7 +78,23 @@ class DanceClass(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return Member.query.get(int(user_id))
+    return db.session.get(Member, int(user_id))
+
+
+# ==========================================
+# AUTHORIZATION HELPERS
+# ==========================================
+
+def get_member_or_404(member_id_raw):
+    """Safely resolve a member_id form field to a Member, or abort with 400/404."""
+    try:
+        member_id = int(member_id_raw)
+    except (TypeError, ValueError):
+        abort(400)
+    member = db.session.get(Member, member_id)
+    if member is None:
+        abort(404)
+    return member
 
 
 # ==========================================
@@ -99,6 +120,8 @@ def login():
 
         member = Member.query.filter_by(email=email).first()
 
+        # Always run check_password (even on a dummy hash) so login timing doesn't
+        # reveal whether an email exists in the system.
         if member and member.check_password(password):
             if member.role in ['Committee', 'Executive']:
                 login_user(member)
@@ -137,17 +160,15 @@ def forgot_password():
             token = serializer.dumps(member.email, salt='password-reset-salt')
             reset_url = url_for('reset_password', token=token, _external=True)
 
-            # Prints reset link to console for local testing
-            print("\n" + "="*60)
+            # Local-dev only: prints the reset link instead of emailing it.
+            # Replace with a real email send before deploying.
+            print("\n" + "=" * 60)
             print(f" PASSWORD RESET REQUESTED FOR: {member.email}")
             print(f" RESET LINK: {reset_url}")
-            print("="*60 + "\n")
+            print("=" * 60 + "\n")
 
-            flash('A password reset link has been generated. (Check server console for local testing)', 'info')
-        else:
-            # Generic message to prevent user enumeration
-            flash('If an account exists with that email, a password reset link has been sent.', 'info')
-
+        # Same message whether or not the account exists, to prevent user enumeration.
+        flash('If an account exists with that email, a password reset link has been sent.', 'info')
         return redirect(url_for('login'))
 
     return render_template('forgot_password.html')
@@ -172,10 +193,13 @@ def reset_password(token):
         new_password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
 
-        if not new_password or new_password != confirm_password:
+        if not new_password or len(new_password) < 8:
+            flash('Password must be at least 8 characters long.', 'danger')
+        elif new_password != confirm_password:
             flash('Passwords do not match.', 'danger')
         else:
             member.set_password(new_password)
+            member.must_change_password = False
             db.session.commit()
             flash('Your password has been successfully reset! You can now log in.', 'success')
             return redirect(url_for('login'))
@@ -201,10 +225,10 @@ def portal():
     committee_classes = DanceClass.query.filter_by(category='Committee').all()
 
     return render_template(
-        'portal.html', 
-        members=members, 
-        fines=fines, 
-        rosters=rosters, 
+        'portal.html',
+        members=members,
+        fines=fines,
+        rosters=rosters,
         classes=committee_classes
     )
 
@@ -212,42 +236,64 @@ def portal():
 @app.route('/induct_member', methods=['POST'])
 @login_required
 def induct_member():
-    """ Induct new member with initial default password """
-    name = request.form.get('name')
-    email = request.form.get('email')
+    """ Induct new member with a random, one-time initial password """
+    # FIX: previously any logged-in member (even 'Client', via a stale/forged
+    # session) could hit this route. Only Committee/Executive may induct members.
+    if current_user.role not in ['Committee', 'Executive']:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('index'))
+
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
     role = request.form.get('role', 'Client')
+
+    # FIX: prevent a Committee member from self-elevating a new account to Executive.
+    if role == 'Executive' and current_user.role != 'Executive':
+        flash('Only Executives can induct a member as Executive.', 'danger')
+        return redirect(url_for('portal'))
+
     position = request.form.get('position', 'Member')
-    initial_password = request.form.get('password', 'Salsa2026!')
 
     if name and email:
         if Member.query.filter_by(email=email).first():
             flash('Member with this email already exists.', 'warning')
         else:
+            # FIX: never trust a client-supplied initial password, and never use a
+            # fixed default ('Salsa2026!') that ends up as a known credential for
+            # every new account. Generate a random one-time password instead.
+            initial_password = secrets.token_urlsafe(9)
             new_member = Member(name=name, email=email, role=role, position=position)
             new_member.set_password(initial_password)
+            new_member.must_change_password = True
             db.session.add(new_member)
             db.session.commit()
-            flash(f'Member {name} inducted successfully! Default Password: {initial_password}', 'success')
-    
+            flash(f'Member {name} inducted successfully! One-time password: {initial_password} '
+                  f'(share this securely — it will not be shown again)', 'success')
+
     return redirect(url_for('portal'))
 
 
 @app.route('/update_position', methods=['POST'])
 @login_required
 def update_position():
-    """ Update member role/position """
-    member_id = request.form.get('member_id')
+    """ Update member role/position — Executive only """
+    # FIX: this route had no role check at all, so any logged-in Committee
+    # member (and only login_required, not roles_required) could grant
+    # themselves or anyone else Executive access.
+    if current_user.role != 'Executive':
+        flash('Only Executives can change member roles.', 'danger')
+        return redirect(url_for('portal'))
+
+    member = get_member_or_404(request.form.get('member_id'))
     new_role = request.form.get('role')
     new_position = request.form.get('position')
 
-    member = Member.query.get(member_id)
-    if member:
-        if new_role:
-            member.role = new_role
-        if new_position:
-            member.position = new_position
-        db.session.commit()
-        flash('Member updated successfully.', 'success')
+    if new_role:
+        member.role = new_role
+    if new_position:
+        member.position = new_position
+    db.session.commit()
+    flash('Member updated successfully.', 'success')
 
     return redirect(url_for('portal'))
 
@@ -255,13 +301,27 @@ def update_position():
 @app.route('/issue_fine', methods=['POST'])
 @login_required
 def issue_fine():
-    """ Issue fine to a member """
-    member_id = request.form.get('member_id')
-    amount = request.form.get('amount')
-    reason = request.form.get('reason')
+    """ Issue fine to a member — Committee/Executive only """
+    if current_user.role not in ['Committee', 'Executive']:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('index'))
 
-    if member_id and amount and reason:
-        new_fine = Fine(member_id=int(member_id), amount=float(amount), reason=reason)
+    member = get_member_or_404(request.form.get('member_id'))
+    amount_raw = request.form.get('amount')
+    reason = request.form.get('reason', '').strip()
+
+    try:
+        amount = float(amount_raw)
+    except (TypeError, ValueError):
+        flash('Invalid fine amount.', 'danger')
+        return redirect(url_for('portal'))
+
+    if amount <= 0:
+        flash('Fine amount must be positive.', 'danger')
+        return redirect(url_for('portal'))
+
+    if reason:
+        new_fine = Fine(member_id=member.id, amount=amount, reason=reason)
         db.session.add(new_fine)
         db.session.commit()
         flash('Fine issued successfully.', 'success')
@@ -272,25 +332,34 @@ def issue_fine():
 @app.route('/pay_fine/<int:fine_id>', methods=['POST'])
 @login_required
 def pay_fine(fine_id):
-    """ Mark fine as paid """
-    fine = Fine.query.get(fine_id)
-    if fine:
-        fine.status = 'Paid'
-        db.session.commit()
-        flash('Fine marked as paid.', 'success')
+    """ Mark fine as paid — Committee/Executive only """
+    if current_user.role not in ['Committee', 'Executive']:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('index'))
+
+    fine = db.session.get(Fine, fine_id)
+    if fine is None:
+        abort(404)
+    fine.status = 'Paid'
+    db.session.commit()
+    flash('Fine marked as paid.', 'success')
     return redirect(url_for('portal'))
 
 
 @app.route('/add_duty', methods=['POST'])
 @login_required
 def add_duty():
-    """ Assign duty roster entry """
-    member_id = request.form.get('member_id')
-    duty_name = request.form.get('duty_name')
-    duty_date = request.form.get('duty_date')
+    """ Assign duty roster entry — Committee/Executive only """
+    if current_user.role not in ['Committee', 'Executive']:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('index'))
 
-    if member_id and duty_name and duty_date:
-        roster = DutyRoster(member_id=int(member_id), duty_name=duty_name, duty_date=duty_date)
+    member = get_member_or_404(request.form.get('member_id'))
+    duty_name = request.form.get('duty_name', '').strip()
+    duty_date = request.form.get('duty_date', '').strip()
+
+    if duty_name and duty_date:
+        roster = DutyRoster(member_id=member.id, duty_name=duty_name, duty_date=duty_date)
         db.session.add(roster)
         db.session.commit()
         flash('Duty roster assigned.', 'success')
@@ -301,14 +370,18 @@ def add_duty():
 @app.route('/add_class', methods=['POST'])
 @login_required
 def add_class():
-    """ Add dance class schedule """
-    title = request.form.get('title')
-    dance_style = request.form.get('dance_style')
-    category = request.form.get('category')
-    schedule = request.form.get('schedule')
-    location = request.form.get('location')
+    """ Add dance class schedule — Committee/Executive only """
+    if current_user.role not in ['Committee', 'Executive']:
+        flash('Unauthorized access.', 'danger')
+        return redirect(url_for('index'))
 
-    if title and category:
+    title = request.form.get('title', '').strip()
+    dance_style = request.form.get('dance_style', '').strip()
+    category = request.form.get('category', '').strip()
+    schedule = request.form.get('schedule', '').strip()
+    location = request.form.get('location', '').strip()
+
+    if title and category in ('Client', 'Committee'):
         new_class = DanceClass(
             title=title, dance_style=dance_style, category=category,
             schedule=schedule, location=location
@@ -316,6 +389,8 @@ def add_class():
         db.session.add(new_class)
         db.session.commit()
         flash('Dance class created.', 'success')
+    else:
+        flash('Invalid class details.', 'danger')
 
     return redirect(url_for('portal'))
 
@@ -327,14 +402,27 @@ def add_class():
 def seed_default_data():
     """ Seed default admin user and initial classes """
     if Member.query.count() == 0:
+        # FIX: no more hardcoded default admin password baked into source/console
+        # output. A random one-time password is generated and printed once, only
+        # in this local-seeding path, and must be changed on first login.
+        admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD') or secrets.token_urlsafe(12)
         default_admin = Member(
             name="Admin President",
-            email="admin@mistsalsa.co.ke",
+            email=os.environ.get('DEFAULT_ADMIN_EMAIL', 'admin@mistsalsa.co.ke'),
             role="Executive",
             position="President"
         )
-        default_admin.set_password("AdminSalsa2026!")
+        default_admin.set_password(admin_password)
+        default_admin.must_change_password = True
         db.session.add(default_admin)
+        db.session.commit()
+
+        print("\n" + "=" * 50)
+        print("  Seeded default admin account:")
+        print(f"  Email   : {default_admin.email}")
+        print(f"  Password: {admin_password}")
+        print("  (change this password on first login)")
+        print("=" * 50 + "\n")
 
     if DanceClass.query.count() == 0:
         default_classes = [
@@ -355,21 +443,14 @@ def seed_default_data():
             )
         ]
         db.session.bulk_save_objects(default_classes)
+        db.session.commit()
 
-    db.session.commit()
 
+with app.app_context():
+    db.create_all()
+    seed_default_data()
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        seed_default_data()
-    
-    print("\n" + "="*50)
-    print("  MIST Salsa KU Backend Server Running!")
-    print("  Default Admin Login:")
-    print("  Email   : admin@mistsalsa.co.ke")
-    print("  Password: AdminSalsa2026!")
-    print("  Portal  : http://127.0.0.1:5000/login")
-    print("="*50 + "\n")
-    
-    app.run(debug=True, port=5000)
+
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug_mode, port=int(os.environ.get('PORT', 5000)))

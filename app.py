@@ -7,14 +7,14 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignat
 
 # Initialize Flask Application
 app = Flask(__name__)
-with app.app_context():
-    db. create_all()
 app.config['SECRET_KEY'] = 'mist-salsa-ku-vibrant-key-2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mist_salsa.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize Extensions
 db = SQLAlchemy(app)
+with app.app_context():
+    db. create_all()
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'

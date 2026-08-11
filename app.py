@@ -7,6 +7,8 @@ from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignat
 
 # Initialize Flask Application
 app = Flask(__name__)
+with app.app_context():
+    db. create_all()
 app.config['SECRET_KEY'] = 'mist-salsa-ku-vibrant-key-2026'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mist_salsa.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

@@ -1,11 +1,291 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIST Salsa KU - Dance Club</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #1f1f1f;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff3366;
+        }
+
+        nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 1.5rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff3366;
+        }
+
+        .btn-login {
+            background-color: #ff3366;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .btn-login:hover {
+            background-color: #e02855;
+            color: #fff;
+        }
+
+        .hero {
+            height: 80vh;
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1545128485-c400e7702796?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: #ff3366;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .hero .cta-btn {
+            background-color: #ff3366;
+            color: #fff;
+            padding: 0.8rem 2rem;
+            text-decoration: none;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.3s;
+        }
+
+        .hero .cta-btn:hover {
+            transform: scale(1.05);
+            background-color: #e02855;
+        }
+
+        .section {
+            padding: 4rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 2.5rem;
+            color: #ff3366;
+        }
+
+        .styles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: #1f1f1f;
+            padding: 2rem;
+            border-radius: 10px;
+            border-left: 4px solid #ff3366;
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            margin-bottom: 0.8rem;
+            color: #fff;
+        }
+
+        .schedule-list {
+            background-color: #1f1f1f;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .form-container {
+            background-color: #1f1f1f;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border-radius: 5px;
+            border: 1px solid #333;
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background-color: #ff3366;
+            color: #fff;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #e02855;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: #1f1f1f;
+            margin-top: 4rem;
+            color: #888;
+        }
+    </style>
 </head>
 <body>
-    <h1>Portal</h1>
-    <p>Welcome to the admin portal</p>
-    <a href="/logout">Logout</a>
+
+    <header>
+        <div class="logo">💃 MIST Salsa KU</div>
+        <nav>
+            <a href="#about">About</a>
+            <a href="#styles">Dance Styles</a>
+            <a href="#schedule">Schedule</a>
+            <a href="#join">Join Us</a>
+            <a href="/login" class="btn-login">Committee Login</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Feel the Rhythm</h1>
+        <p>Welcome to MIST Salsa KU! Experience the energy, passion, and fun of Latin dance right on campus.</p>
+        <a href="#join" class="cta-btn">Register Now</a>
+    </section>
+
+    <section id="styles" class="section">
+        <h2 class="section-title">Dance Styles We Teach</h2>
+        <div class="styles-grid">
+            <div class="card">
+                <h3>🔥 Salsa</h3>
+                <p>Fast-paced, energetic, and full of fluid footwork and turn patterns. Suitable for all skill levels!</p>
+            </div>
+            <div class="card">
+                <h3>❤️ Bachata</h3>
+                <p>Sensual and rhythmic dance originating from the Dominican Republic, perfect for learning rhythm and connection.</p>
+            </div>
+            <div class="card">
+                <h3>🎶 Kompa</h3>
+                <p>Smooth Haitian dance genre emphasizing subtle hip movements, flow, and musical expression.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="schedule" class="section">
+        <h2 class="section-title">Weekly Practice Schedule</h2>
+        <div class="schedule-list">
+            <div class="schedule-item">
+                <span><strong>Tuesday (Beginners)</strong> - Salsa Fundamentals</span>
+                <span>5:00 PM - 7:00 PM</span>
+            </div>
+            <div class="schedule-item">
+                <span><strong>Thursday (Intermediate)</strong> - Bachata & Kompa</span>
+                <span>5:00 PM - 7:00 PM</span>
+            </div>
+            <div class="schedule-item">
+                <span><strong>Saturday</strong> - Social Dancing & Open Floor</span>
+                <span>3:00 PM - 6:00 PM</span>
+            </div>
+        </div>
+    </section>
+
+    <section id="join" class="section">
+        <h2 class="section-title">Join MIST Salsa KU</h2>
+        <div class="form-container">
+            <form action="#" method="POST">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="experience">Experience Level</label>
+                    <select id="experience" name="experience">
+                        <option value="beginner">Complete Beginner</option>
+                        <option value="intermediate">Intermediate</option>
+                        <option value="advanced">Advanced</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Register for Practice</button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 MIST Salsa KU. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>

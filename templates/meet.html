@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MIST Salsa KU | Gallery & Committee</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #ff9f1a;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            background: #24150f;
+            color: white;
+            padding: 20px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        nav a:hover {
+            color: #d9a441;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background:
+                linear-gradient(rgba(36, 21, 15, 0.78),
+                rgba(36, 21, 15, 0.78)),
+                url("/static/images/salsa-hero.jpg") center/cover;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: auto;
+            font-size: 1.1rem;
+        }
+
+        /* =========================
+           GENERAL SECTION
+        ========================= */
+
+        section {
+            padding: 70px 7%;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .section-title h2 {
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #6e625b;
+        }
+
+        /* =========================
+           GALLERY
+        ========================= */
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            height: 250px;
+            overflow: hidden;
+            border-radius: 15px;
+            background: #ddd;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+
+        /* =========================
+           GOOGLE PHOTOS BUTTON
+        ========================= */
+
+        .album-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .album-button {
+            display: inline-block;
+            background: #d9a441;
+            color: #24150f;
+            text-decoration: none;
+            padding: 14px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .album-button:hover {
+            background: #b98220;
+            transform: translateY(-2px);
+        }
+
+        /* =========================
+           COMMITTEE
+        ========================= */
+
+        .committee {
+            background: #24150f;
+            color: white;
+        }
+
+        .committee .section-title p {
+            color: #d6cbc4;
+        }
+
+        .committee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+
+        .committee-card {
+            background: #342019;
+            border-radius: 18px;
+            overflow: hidden;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            transition: transform 0.3s ease;
+        }
+
+        .committee-card:hover {
+            transform: translateY(-8px);
+        }
+
+        .committee-photo {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .committee-info {
+            padding: 25px 20px 30px;
+        }
+
+        .committee-info h3 {
+            font-size: 1.35rem;
+            margin-bottom: 5px;
+        }
+
+        .role {
+            color: #d9a441;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+
+        .quote {
+            color: #ded5d0;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #160d09;
+            color: #cfc4be;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 700px) {
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav a {
+                margin: 0 8px;
+                font-size: 0.9rem;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            section {
+                padding: 55px 5%;
+            }
+
+            .committee-photo {
+                height: 280px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header>
+
+        <div class="logo">
+            MIST Salsa KU
+        </div>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="#gallery">Gallery</a>
+            <a href="#committee">Committee</a>
+        </nav>
+
+    </header>
+
+
+    <!-- =========================
+         HERO
+    ========================= -->
+
+    <section class="hero">
+
+        <h1>Our Community</h1>
+
+        <p>
+            Dance, connect, create memories and meet the people
+            behind MIST Salsa KU.
+        </p>
+
+    </section>
+
+
+    <!-- =========================
+         PHOTO GALLERY
+    ========================= -->
+
+    <section id="gallery">
+
+        <div class="section-title">
+
+            <h2>Our Gallery</h2>
+
+            <p>
+                A glimpse into our classes, socials, workshops and events.
+            </p>
+
+        </div>
+
+
+        <div class="gallery">
+
+            <!-- Replace these image paths with your actual images -->
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery1.jpg"
+                     alt="MIST Salsa KU event">
+            </div>
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery2.jpg"
+                     alt="Salsa class">
+            </div>
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery3.jpg"
+                     alt="Salsa social">
+            </div>
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery4.jpg"
+                     alt="Dance workshop">
+            </div>
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery5.jpg"
+                     alt="MIST Salsa KU members">
+            </div>
+
+            <div class="gallery-item">
+                <img src="/static/images/gallery6.jpg"
+                     alt="Salsa performance">
+            </div>
+
+        </div>
+
+
+        <!-- GOOGLE PHOTOS -->
+
+        <div class="album-container">
+
+            <!-- Replace the URL below with your Google Photos album -->
+
+            <a
+                href="https://photos.google.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="album-button"
+            >
+                📸 View Full Google Photos Album
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         MEET THE COMMITTEE
+    ========================= -->
+
+    <section id="committee" class="committee">
+
+        <div class="section-title">
+
+            <h2>Meet the Committee</h2>
+
+            <p>
+                The people helping build and grow the MIST Salsa KU community.
+            </p>
+
+        </div>
+
+
+        <div class="committee-grid">
+
+
+            <!-- CHAIRPERSON -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/chairperson.jpg"
+                    alt="Chairperson"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Chairperson
+                    </div>
+
+                    <p class="quote">
+                        "Dance is not just about the steps;
+                        it's about the people you meet along the way."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- VICE CHAIRPERSON -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/vice-chairperson.jpg"
+                    alt="Vice Chairperson"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Vice Chairperson   
+                    </div>
+
+                    <p class="quote">
+                        "Every class is an opportunity to learn,
+                        connect and become better."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- VICE CHAIRPERSON -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/vice-chairperson.jpg"
+                    alt="Vice Chairperson"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Vice Chairperson   
+                    </div>
+
+                    <p class="quote">
+                        "Great communities are built one connection
+                        at a time."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- SENIOR MEMBER -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/senior-member.jpg"
+                    alt="Senior Member"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Senior Member
+                    </div>
+
+                    <p class="quote">
+                        "Passion makes the music,
+                        discipline makes the progress."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- INSTRUCTOR -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/instructor.jpg"
+                    alt="Dance Instructor"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Head Instructor
+                    </div>
+
+                    <p class="quote">
+                        "You don't have to be a dancer to start.
+                        You just have to start."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- CHOREOGRAPHIES COORDINATOR -->
+
+            <div class="committee-card">
+
+                <img
+                    src="/static/images/committee/choreography.jpg"
+                    alt="Choreography Coordinator"
+                    class="committee-photo"
+                >
+
+                <div class="committee-info">
+
+                    <h3>Member Name</h3>
+
+                    <div class="role">
+                        Choreography Coordinator
+                    </div>
+
+                    <p class="quote">
+                        "The best memories happen when
+                        we stop watching and start dancing."
+                    </p>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <p>
+            © 2026 MIST Salsa KU. All rights reserved.
+        </p>
+
+        <p>
+            Dance • Connect • Create
+        </p>
+
+    </footer>
+
+
+</body>
+</html>

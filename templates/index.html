@@ -1,10 +1,322 @@
 ﻿<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>MIST SALSA KU</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIST Salsa KU | Vibrant Dance Community</title>
+    <style>
+        /* Modern Vibrant Styling & CSS Variables */
+        :root {
+            --primary-pink: #ff2e63;
+            --salsa-gold: #ff9f1a;
+            --bg-dark: #121212;
+            --card-bg: #1e1e24;
+            --text-light: #f4f4f9;
+            --text-muted: #a0a0aa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        /* Navigation Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 8%;
+            background: rgba(18, 18, 18, 0.95);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 46, 99, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary-pink);
+            letter-spacing: 1px;
+        }
+
+        .logo span {
+            color: var(--salsa-gold);
+        }
+
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            margin-left: 1.8rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--salsa-gold);
+        }
+
+        /* Hero Banner */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+            background: linear-gradient(rgba(18, 18, 18, 0.75), rgba(18, 18, 18, 0.95)), 
+                        url('http://googleusercontent.com/lmdx_content/gpRNQPrZYnTAOdLfIlylVXfYdbvzEqptqTuhrahSWqlOMiywWhZlaqeybnFweutZFjaqnSpHxNgRmnTiteWJMGfAcFADcGcFmOVYHRdkXJeEDhLeeIwOsrprOJRQeTyLC39537') center/cover no-repeat;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px rgba(255, 46, 99, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--primary-pink), var(--salsa-gold));
+            color: #fff;
+            padding: 0.9rem 2.2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 46, 99, 0.4);
+        }
+
+        /* Sections General */
+        section {
+            padding: 6rem 8% 4rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.3rem;
+            margin-bottom: 3rem;
+            color: var(--salsa-gold);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            width: 60px;
+            height: 3px;
+            background: var(--primary-pink);
+            display: block;
+            margin: 0.5rem auto 0;
+            border-radius: 2px;
+        }
+
+        /* Styles Showcase Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-pink);
+        }
+
+        .card h3 {
+            color: var(--primary-pink);
+            margin-bottom: 0.8rem;
+            font-size: 1.4rem;
+        }
+
+        /* Class Schedule Table */
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .schedule-table th, .schedule-table td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .schedule-table th {
+            background-color: rgba(255, 46, 99, 0.15);
+            color: var(--salsa-gold);
+        }
+
+        /* Location & Contact Section */
+        .contact-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .contact-info a {
+            color: var(--salsa-gold);
+            text-decoration: none;
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-btn {
+            background-color: var(--card-bg);
+            color: var(--text-light);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            border: 1px solid rgba(255, 46, 99, 0.3);
+            transition: background 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background-color: var(--primary-pink);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: #0a0a0d;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to MIST SALSA KU</h1>
-    <a href="/login">Login</a>
+
+    <header>
+        <div class="logo">MIST <span>Salsa KU</span></div>
+        <nav>
+            <a href="#styles">Dance Styles</a>
+            <a href="#classes">Classes</a>
+            <a href="#location">Location</a>
+            <a href="#contact">Contact</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Feel the Rhythm at MIST Salsa KU</h1>
+        <p>Join Kenyatta University's premier dance club. Experience the passion, energy, and community of Salsa, Bachata, and Kompa.</p>
+        <a href="#classes" class="btn">View Class Schedule</a>
+    </section>
+
+    <section id="styles">
+        <h2 class="section-title">Dance Styles We Teach</h2>
+        <div class="grid">
+            <div class="card">
+                <h3>Salsa (LA & Cuban)</h3>
+                <p>Fast-paced, vibrant, and energetic. Master core footwork, cross-body leads, and social partner work.</p>
+            </div>
+            <div class="card">
+                <h3>Sensual Bachata</h3>
+                <p>Smooth rhythms from the Dominican Republic. Focus on body movement, connection, and musicality.</p>
+            </div>
+            <div class="card">
+                <h3>Kompa</h3>
+                <p>Haitian social dance emphasizing smooth hip movements, relaxed rhythms, and lead-follow harmony.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="classes">
+        <h2 class="section-title">Weekly Class Schedule</h2>
+        <table class="schedule-table">
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Time</th>
+                    <th>Class Level</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monday</td>
+                    <td>6:00 PM - 9:00 PM</td>
+                    <td>Beginner Salsa & Bachata</td>
+                    <td>EF 1-12</td>
+                </tr>
+                <tr>
+                    <td>Wednesday</td>
+                    <td>6:00 PM - 9:00 PM</td>
+                    <td>Intermediate Turn Patterns & Class Recap</td>
+                    <td>EF 1-12</td>
+                </tr>
+                <tr>
+                    <td>Friday</td>
+                    <td>4:00 PM - 9:00 PM</td>
+                    <td>Social Dancing & Musicality Workshop</td>
+                    <td>EF 1-12</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section id="location">
+        <h2 class="section-title">Find Us & Connect</h2>
+        <div class="contact-container">
+            <div class="card contact-info">
+                <h3>Club Venue</h3>
+                <p>Kenyatta University Main Campus</p>
+                <p>EF 1-12</p>
+                <p>Nairobi, Kenya</p>
+            </div>
+            <div class="card contact-info" id="contact">
+                <h3>Direct Contact</h3>
+                <p>Email: <a href="mailto:mistsalsa@ku.ac.ke">mistsalsa@ku.ac.ke</a></p>
+                <p>Phone / WhatsApp: <a href="https://wa.me/254700000000" target="_blank">+254 700 000 000</a></p>
+                <div class="social-links">
+                    <a href="#" class="social-btn">Instagram</a> 
+                    <a href="#" class="social-btn">WhatsApp Group</a>
+                    <a href="#" class="social-btn">TikTok</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 MIST Salsa KU Club. All rights reserved.</p>
+    </footer>
+
 </body>
 </html>
